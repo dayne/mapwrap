@@ -24,7 +24,12 @@ require 'cgi'
 require 'yaml'
 cgi = CGI.new("html4")
 conf = YAML.load_file(CONFIG_FILE)
-mapserv="/opt/mapping_tools/bin/mapserv.svn"
+
+if conf['mapserv']
+  mapserv=conf['mapserv']
+else
+  mapserv='mapserv' # rely on environment path to provide mapserv
+end
 
 # figure out which mapfile to use by parsing the fun:
 magic = ENV['REQUEST_URI'].split('?')[0].split('/') if ENV['REQUEST_URI']
@@ -94,6 +99,7 @@ if wms_params.size > 0
 end
 
 =begin
+## unfinished thoughts for ESRI exception problems
 if ( etype = pfind( 'EXCEPTION', cgi.params ) )
   if not %w{ blank image xml }.include?(etype) 
     # ESRI client probably doing it wrong, force to XML
@@ -102,11 +108,11 @@ if ( etype = pfind( 'EXCEPTION', cgi.params ) )
 end
 =end
 
-
 ## unless pfind('map',cgi.params)
 if (cgi.params['map'].size == 0 ) and ( cgi.params['MAP'].size == 0 )
   ENV["QUERY_STRING"]="map=#{mapfile}&"+ENV["QUERY_STRING"]
-  system(". /opt/mapping_tools/setup.sh; #{mapserv} ")
+  envsh = (File.exists? conf['envsh'])?("source #{conf['envsh']}"):''
+  system(" #{envsh} ; #{mapserv} ")
 else
   # user being naughty and trying to find themselves a mapfile
   cgi.out{ "Sorry, You can't specifiy a map file with this service" }

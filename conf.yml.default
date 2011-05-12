@@ -1,20 +1,9 @@
-default: /www/wms.soy/apps/mapserver/maps/default.map
+mapserv: /opt/mapping_tools/bin/mapserv.svn
+envsh: /opt/mapping_tools/setup.sh
+default: /www/wms/apps/mapserver//default.map
 maps:
-  spot_pan: /www/wms.soy/apps/mapserver/maps/spot_pan.map
-  spot_ms: /www/wms.soy/apps/mapserver/maps/spot_ms.map
-  bluemarble: /www/wms.soy/apps/mapserver/maps/bluemarble.map
-  histogram: /www/wms.soy/apps/mapserver/maps/histogram.map
-  test_ortho_rgb: /www/wms.soy/apps/mapserver/maps/test_ortho_rgb.map
-  megab: /www/wms.soy/apps/mapserver/maps/megab.map
+  bluemarble: /www/wms/apps/mapserver/maps/bluemarble.map
+  megab: /www/wms/apps/mapserver/maps/megab.map
   ortho_rgb: 
-    default: /www/wms.soy/apps/mapserver/maps/ortho_rgb.map
-    900913: /www/wms.soy/apps/mapserver/maps/ortho_rgb_gm.map
-  ortho_cir: 
-    default: /www/wms.soy/apps/mapserver/maps/ortho_cir.map
-    900913: /www/wms.soy/apps/mapserver/maps/ortho_cir_gm.map
-  ortho_pan1: 
-    default: /www/wms.soy/apps/mapserver/maps/ortho_pan1.map
-    900913: /www/wms.soy/apps/mapserver/maps/ortho_pan1.gm.map
-  ortho_pan2: 
-    default: /www/wms.soy/apps/mapserver/maps/ortho_pan2.map
-    900913: /www/wms.soy/apps/mapserver/maps/ortho_pan2.gm.map
+    default: /www/wms/apps/mapserver/maps/ortho_rgb.map
+    900913: /www/wms/apps/mapserver/maps/ortho_rgb_gm.map
