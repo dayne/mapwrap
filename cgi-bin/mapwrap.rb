@@ -67,6 +67,8 @@ if map and conf['maps'][map]
   if mapfile.class == Hash
     if mapfile[srs]
       mapfile = mapfile[srs]
+    else
+      mapfile = mapfile['default']
     end
   end
 end
