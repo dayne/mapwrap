@@ -1,7 +1,13 @@
 Map Wrap - MapServer wrapper
 ============================
 
-*dayne needs an overview introduction here*
+A MapServer CGI wrapper that simplifies the URLs to your WMS services and provides the following features:
+
+* defaults SERVICE to WMS
+* defaults REQUEST to GetCapabilities
+* allows for projection optimized mapfiles
+* accepts both POST and GET requests
+
 
 INSTALL:
 --------
@@ -23,12 +29,14 @@ To use this handy wrapper script you have to setup a few things.
 
 * create the CONFIG_FILE.  It should look like:
 
+``` yaml
     maps:
       bluemarble: /www/wms.soy/apps/mapserver/maps/bluemarble.map
       example: /www/wms.soy/apps/mapserver/maps/bluemarble.map
       spot_pan: 
         default: /www/wms.soy/apps/mapserver/maps/spot_pan.map
         900913: /www/wms.soy/apps/mapserver/maps/spot_pan-900913.map
+```
 
 * tail -f error.log and access.log, reload apache
 
