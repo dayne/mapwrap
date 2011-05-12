@@ -59,7 +59,7 @@ The following can be slide into appropriate Apache config section or `/etc/httpd
 Configuration: conf.yml
 -----------------------
 
-Hopefully the only part you have to maintain after you've set things up correctly.  To get started just do a somple `cp conf.yml.example conf.yml`
+Hopefully the only part you have to maintain after you've set things up correctly.  To get started just do a somple `cp conf.yml.default conf.yml`
 
 ``` yaml
 mapserv: /opt/mapping_tools/bin/mapserv.svn
