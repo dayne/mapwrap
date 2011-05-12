@@ -23,19 +23,19 @@ To use this handy wrapper script you have to setup a few things.
 
 >  `FUN_PREFIX = "/map"`
 
-* point the CONFIG_FILE at the correct location
+* point the CONFIG_FILE at the correct location (defaults to ../conf.yml)
 
->  `CONFIG_FILE = "/www/wms.soy/apps/mapserver/conf.yml"`
+>  `CONFIG_FILE = "/path/to/mapwrap/conf.yml"`
 
-* create the CONFIG_FILE.  It should look like:
+* create the CONFIG_FILE.  It should look like (see conf.yml.example):
 
 ``` yaml
-    maps:
-      bluemarble: /www/wms.soy/apps/mapserver/maps/bluemarble.map
-      example: /www/wms.soy/apps/mapserver/maps/bluemarble.map
-      spot_pan: 
-        default: /www/wms.soy/apps/mapserver/maps/spot_pan.map
-        900913: /www/wms.soy/apps/mapserver/maps/spot_pan-900913.map
+maps:
+  bluemarble: /www/wms.soy/apps/mapserver/maps/bluemarble.map
+  example: /www/wms.soy/apps/mapserver/maps/bluemarble.map
+  spot_pan: 
+    default: /www/wms.soy/apps/mapserver/maps/spot_pan.map
+    900913: /www/wms.soy/apps/mapserver/maps/spot_pan-900913.map
 ```
 
 * tail -f error.log and access.log, reload apache

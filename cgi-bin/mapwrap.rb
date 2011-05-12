@@ -12,7 +12,7 @@ http://github.com/dayne/mapwrap
 
 =end
 FUN_PREFIX = "/map"
-CONFIG_FILE = "/home/webdev/mapwrap/conf.yml"
+CONFIG_FILE = "/path/to/mapwrap/conf.yml"
 
 unless File.exists?(CONFIG_FILE)
 # bad path to config, lets see if we can find it in ../conf.yml
