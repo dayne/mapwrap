@@ -8,6 +8,7 @@ A MapServer CGI wrapper that simplifies the URLs to your WMS services and provid
 * allows for projection optimized mapfiles
 * accepts both POST and GET requests
 * simple name alias for a map
+* ghetto list of available MapServer maps
 
 *Why is that useful?*
 
