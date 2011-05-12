@@ -11,7 +11,7 @@ http://github.com/dayne/mapwrap
 * accepts both POST and GET requests
 
 =end
-FUN_PREFIX = "/map"
+MAP_PREFIX = "/map"
 CONFIG_FILE = "/path/to/mapwrap/conf.yml"
 
 unless File.exists?(CONFIG_FILE)
@@ -44,8 +44,14 @@ case magic[3]
 end
 
 
-if "/#{fun}" != FUN_PREFIX
+if "/#{fun}" != MAP_PREFIX
   # TODO error out here as the script has been run badly
+  cgi.out do
+    cgi.html do
+      "<b>MapWrap Error:</b>  <br />" + 
+      "<tt>MAP_PREFIX=#{MAP_PREFIX}</tt> but got <tt>#{fun}</tt> instead."
+    end
+  end
 end
 
 srs = cgi['srs'] || cgi['SRS'] || cgi['crs'] || cgi['CRS']
@@ -61,13 +67,23 @@ if map and conf['maps'][map]
   if mapfile.class == Hash
     if mapfile[srs]
       mapfile = mapfile[srs]
-    else
-      mapfile = mapfile['default']
     end
   end
-else
-  # TODO ERROR OUT instead of this silly default
-  mapfile =  conf['default']
+end
+if not mapfile
+  #mapfile =  conf['default'] # old way
+  cgi.out do
+    cgi.html do 
+      if conf['maps']
+        " <b>no map file specified</b> <br />"+
+        "Options are: <ul><li>" +
+        conf['maps'].keys.join("</li><li>") +
+        " </li></ul>"
+      else
+        "<b>no maps configured yet</b>"
+      end
+    end
+  end
 end
 
 STDERR.puts "mapfile: #{mapfile}" if $test
@@ -83,6 +99,7 @@ def pfind( name, location )
 end
 
 =begin
+# TODO: unfinished thought part 1
 def pset( name, value )
   # 
 end
@@ -99,7 +116,7 @@ if wms_params.size > 0
 end
 
 =begin
-## unfinished thoughts for ESRI exception problems
+# TODO: unfinished thoughts for ESRI exception problems
 if ( etype = pfind( 'EXCEPTION', cgi.params ) )
   if not %w{ blank image xml }.include?(etype) 
     # ESRI client probably doing it wrong, force to XML

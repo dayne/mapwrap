@@ -1,6 +1,5 @@
 mapserv: /opt/mapping_tools/bin/mapserv.svn
 envsh: /opt/mapping_tools/setup.sh
-default: /www/wms/apps/mapserver//default.map
 maps:
   bluemarble: /www/wms/apps/mapserver/maps/bluemarble.map
   megab: /www/wms/apps/mapserver/maps/megab.map

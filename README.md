@@ -64,7 +64,6 @@ Hopefully the only part you have to maintain after you've set things up correctl
 ``` yaml
 mapserv: /opt/mapping_tools/bin/mapserv.svn
 envsh: /opt/mapping_tools/setup.sh
-default: /www/wms/apps/mapserver/maps/bluemarble.map
 maps:
   bluemarble: /www/wms/apps/mapserver/maps/bluemarble.map
   example: /www/wms/apps/mapserver/maps/bluemarble.map

@@ -1,5 +1,9 @@
-#!/home/webdev/.rvm/rubies/ruby-1.9.2-p180/bin/ruby
-#!/usr/local/rvm/rubies/ruby-1.9.2-p0/bin/ruby
+#!/usr/bin/env ruby
+#
+# simple fun.rb CGI script I used for testing behaviors of the 
+# URL magic.  Not really useful for mapwrap itself, just useful
+# for testing the apache environment it is running in.
+#
 FUN_PREFIX = "/fun"
 
 require 'cgi'
@@ -26,7 +30,7 @@ cgi.out do
       cgi.keys.inspect +
       "\n>>>> FUN TIME: ---\n" +
       "\t#{fp}\n\t#{awesome}" +
-      "\n>>>> RUS TIME: ---\n" +
+      "\n>>>> REQUEST_URI: ---\n" +
       rus.inspect + 
       "\n>>>> ENV: ---\n" +
       ENV.inspect.gsub(",",",\n\t") 
