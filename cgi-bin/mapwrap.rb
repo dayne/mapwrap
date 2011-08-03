@@ -10,10 +10,31 @@ http://github.com/dayne/mapwrap
 * allows for projection optimized mapfiles
 * accepts both POST and GET requests
 
-=end
-MAP_PREFIX = "/map"
-CONFIG_FILE = "/path/to/mapwrap/conf.yml"
 
+basic mapper scheme..
+
+1) loop though configs: 
+  compare each item, maching prefix with "url", if it matchs, then use that item for 
+2) if nothing matches, check "default", compare with "prefix" if it matches use that item
+   if so, then attempt to match with the items in "map"
+3) if nothing matches, then generate an error.
+
+=end
+
+CONFIG_FILE = File.dirname(__FILE__) + "/../apps/map_wrap/conf.yml"
+
+##
+# Looks for request in config
+def find_item ( config, request ) 
+	config.keys.each do |item|
+		return config[item] if ( request == config[item]["url"])
+	end
+	nil
+end 
+
+
+##
+#  attempt to load config ..
 unless File.exists?(CONFIG_FILE)
 # bad path to config, lets see if we can find it in ../conf.yml
   poke = File.join(File.dirname(__FILE__),'..','conf.yml')
@@ -25,17 +46,32 @@ require 'yaml'
 cgi = CGI.new("html4")
 conf = YAML.load_file(CONFIG_FILE)
 
+# figure out which mapfile to use by parsing the fun:
+magic = ENV['REQUEST_URI'].split('?')[0].split('/') if ENV['REQUEST_URI']
+
+empty = magic[0]
+fun = magic[1]
+map = magic[2]
+#First look in "configs", and see if the url has a direct mapping..
+conf_item = find_item(conf["configs"], fun) if (conf["configs"] && conf["configs"].keys.length > 0)
+
+
+if (conf_item)
+	#do something..
+else
+	conf = conf["defaults"]
+end
+
+
+#now procede..
+
+
 if conf['mapserv']
   mapserv=conf['mapserv']
 else
   mapserv='mapserv' # rely on environment path to provide mapserv
 end
 
-# figure out which mapfile to use by parsing the fun:
-magic = ENV['REQUEST_URI'].split('?')[0].split('/') if ENV['REQUEST_URI']
-empty = magic[0]
-fun = magic[1]
-map = magic[2]
 case magic[3]
   when 'test' then 
     $test = true
@@ -44,12 +80,12 @@ case magic[3]
 end
 
 
-if "/#{fun}" != MAP_PREFIX
+if fun != conf["prefix"]
   # TODO error out here as the script has been run badly
   cgi.out do
     cgi.html do
       "<b>MapWrap Error:</b>  <br />" + 
-      "<tt>MAP_PREFIX=#{MAP_PREFIX}</tt> but got <tt>#{fun}</tt> instead."
+      "<tt>MAP_PREFIX=#{conf["prefix"]}/tt> but got <tt>#{fun}</tt> instead."
     end
   end
 end
@@ -117,15 +153,14 @@ if wms_params.size > 0
   ENV["QUERY_STRING"]  = wms_query + "&" + ENV["QUERY_STRING"] 
 end
 
-=begin
-# TODO: unfinished thoughts for ESRI exception problems
-if ( etype = pfind( 'EXCEPTION', cgi.params ) )
+# TODO: fix ESRI exception problems
+if ( etype = pfind( 'EXCEPTIONS', cgi.params ) )
   if not %w{ blank image xml }.include?(etype) 
     # ESRI client probably doing it wrong, force to XML
-    pset('EXCEPTION', 'XML')
+    ENV["QUERY_STRING"] += "&EXCEPTIONS=XML"
+    STDERR.puts(ENV["QUERY_STRING"])
   end
 end
-=end
 
 ## unless pfind('map',cgi.params)
 if (cgi.params['map'].size == 0 ) and ( cgi.params['MAP'].size == 0 )
