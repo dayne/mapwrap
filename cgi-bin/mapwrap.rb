@@ -30,7 +30,17 @@ def find_item ( config, request )
 		return config[item] if ( request == config[item]["url"])
 	end
 	nil
-end 
+end
+
+def pfind( name, location )
+	result = false
+	[name, name.upcase, name.downcase].each do |n|
+		next if result
+		result = location[n] if location[n] and location[n].size > 0 
+	end
+	STDERR.puts "found #{result} for #{name}" if $test
+	result
+end
 
 
 ##
@@ -55,119 +65,116 @@ map = magic[2]
 #First look in "configs", and see if the url has a direct mapping..
 conf_item = find_item(conf["configs"], fun) if (conf["configs"] && conf["configs"].keys.length > 0)
 
-
 if (conf_item)
-	#do something..
+	#for each item we need a "mapserv" and a "envsh" - if these don't exist, copy them from the default set.
+	["mapserv", "envsh"].each { |conf_key_set| conf_item[conf_key_set]=conf["defaults"][conf_key_set] if (!conf_item[conf_key_set]) }
 else
+	#no direct url mapping, use defaults.
 	conf = conf["defaults"]
 end
 
 
-#now procede..
-
-
-if conf['mapserv']
-  mapserv=conf['mapserv']
-else
-  mapserv='mapserv' # rely on environment path to provide mapserv
-end
-
-case magic[3]
-  when 'test' then 
-    $test = true
-  else
-    # no special sauce asked for, none given
-end
-
-
-if fun != conf["prefix"]
-  # TODO error out here as the script has been run badly
-  cgi.out do
-    cgi.html do
-      "<b>MapWrap Error:</b>  <br />" + 
-      "<tt>MAP_PREFIX=#{conf["prefix"]}/tt> but got <tt>#{fun}</tt> instead."
-    end
-  end
-end
-
-srs = cgi['srs'] || cgi['SRS'] || cgi['crs'] || cgi['CRS']
-srs = srs.join() if (srs.class == Array)
-proj = nil
-proj = srs.split(":").last.to_i if (srs)
-
-
-# if proj is in the maps thing use it or just use default
-
-if map and conf['maps'][map]
-  mapfile = conf['maps'][map]
-  if mapfile.class == Hash
-    if mapfile[srs]
-      mapfile = mapfile[srs]
-    else
-      mapfile = mapfile['default']
-    end
-  end
-end
-if not mapfile
-  #mapfile =  conf['default'] # old way
-  cgi.out do
-    cgi.html do 
-      if conf['maps']
-        " <b>no map file specified</b> <br />"+
-        "Options are: <ul><li>" +
-        conf['maps'].keys.join("</li><li>") +
-        " </li></ul>"
-      else
-        "<b>no maps configured yet</b>"
-      end
-    end
-  end
-end
-
-STDERR.puts "mapfile: #{mapfile}" if $test
-
-def pfind( name, location )
-  result = false
-  [name, name.upcase, name.downcase].each do |n|
-    next if result
-    result = location[n] if location[n] and location[n].size > 0 
-  end
-  STDERR.puts "found #{result} for #{name}" if $test
-  result
-end
-
-=begin
-# TODO: unfinished thought part 1
-def pset( name, value )
-  # 
-end
-=end
-
-wms_params = {}
-wms_params['SERVICE'] = 'WMS' unless pfind( 'SERVICE', cgi.params)
-wms_params['REQUEST'] = 'GetCapabilities' unless pfind( 'REQUEST', cgi.params)
-
-STDERR.puts wms_params.inspect if $test
-if wms_params.size > 0 
-  wms_query = wms_params.map { |k,v| "#{CGI.escape(k)}=#{CGI.escape(v)}" }.join('&')
-  ENV["QUERY_STRING"]  = wms_query + "&" + ENV["QUERY_STRING"] 
-end
-
-# TODO: fix ESRI exception problems
-if ( etype = pfind( 'EXCEPTIONS', cgi.params ) )
-  if not %w{ blank image xml }.include?(etype) 
-    # ESRI client probably doing it wrong, force to XML
-    ENV["QUERY_STRING"] += "&EXCEPTIONS=XML"
-    STDERR.puts(ENV["QUERY_STRING"])
-  end
-end
-
-## unless pfind('map',cgi.params)
-if (cgi.params['map'].size == 0 ) and ( cgi.params['MAP'].size == 0 )
-  ENV["QUERY_STRING"]="map=#{mapfile}&"+ENV["QUERY_STRING"]
-  envsh = (File.exists? conf['envsh'])?("source #{conf['envsh']}"):''
-  system(" #{envsh} ; #{mapserv} ")
-else
-  # user being naughty and trying to find themselves a mapfile
-  cgi.out{ "Sorry, You can't specifiy a map file with this service" }
+begin
+	#verfiy that the mapserv path is set..
+	if conf['mapserv']
+	  mapserv=conf['mapserv']
+	else
+	  mapserv='mapserv' # rely on environment path to provide mapserv
+	end
+	
+	case magic[3]
+	  when 'test' then 
+	    $test = true
+	  else
+	    # no special sauce asked for, none given
+	end
+	
+	
+	if fun != conf["prefix"]
+	  # TODO error out here as the script has been run badly
+	  raise RuntimeError.new( "<b>MapWrap Error:</b>  <br />" + 
+	      "<tt>MAP_PREFIX=#{conf["prefix"]}</tt> but got <tt>#{fun}</tt> instead." )
+	end
+	
+	srs = cgi['srs'] || cgi['SRS'] || cgi['crs'] || cgi['CRS']
+	srs = srs.join() if (srs.class == Array)
+	proj = nil
+	proj = srs.split(":").last.to_i if (srs)
+	
+	
+	# if proj is in the maps thing use it or just use default
+	
+	if map and conf['maps'][map]
+	  mapfile = conf['maps'][map]
+	  if mapfile.class == Hash
+	    if mapfile[srs]
+	      mapfile = mapfile[srs]
+	else
+	      mapfile = mapfile['default']
+	    end
+	  end
+	end
+	
+	#Verify that the mapfile is valid..
+	if not mapfile
+		msg = ""
+		if conf['maps']
+			msg += " <b>no map file specified</b> <br />"+
+			msg += "Options are: <ul><li>" +
+			msg += conf['maps'].keys.join("</li><li>") +
+			msg += " </li></ul>"
+		else
+			msg += "<b>Error: no maps.</b>"
+		end
+		raise RuntimeError.new(msg)
+	end
+	
+	STDERR.puts "mapfile: #{mapfile}" if $test
+	
+	wms_params = {}
+	wms_params['SERVICE'] = 'WMS' unless pfind( 'SERVICE', cgi.params)
+	wms_params['REQUEST'] = 'GetCapabilities' unless pfind( 'REQUEST', cgi.params)
+	
+	STDERR.puts wms_params.inspect if $test
+	if wms_params.size > 0 
+	  wms_query = wms_params.map { |k,v| "#{CGI.escape(k)}=#{CGI.escape(v)}" }.join('&')
+	  ENV["QUERY_STRING"]  = wms_query + "&" + ENV["QUERY_STRING"] 
+	end
+	
+	# TODO: fix ESRI exception problems
+	if ( etype = pfind( 'EXCEPTIONS', cgi.params ) )
+	  if not %w{ blank image xml }.include?(etype) 
+	    # ESRI client probably doing it wrong, force to XML
+	    ENV["QUERY_STRING"] += "&EXCEPTIONS=XML"
+	    STDERR.puts(ENV["QUERY_STRING"])
+	  end
+	end
+	
+	## unless pfind('map',cgi.params)
+	if (cgi.params['map'].size == 0 ) and ( cgi.params['MAP'].size == 0 )
+	  ENV["QUERY_STRING"]="map=#{mapfile}&"+ENV["QUERY_STRING"]
+	  envsh = (File.exists? conf['envsh'])?("source #{conf['envsh']}"):''
+	  system(" #{envsh} ; #{mapserv} ")
+	else
+	  # user being naughty and trying to find themselves a mapfile
+	  raise RuntimeError("Sorry, You can't specifiy a map file with this service" )
+	end
+rescue  RuntimeError=> bang
+	cgi.out do
+	    cgi.html do
+		"An Error Occurred: " +	bang.to_s
+	    end
+	end
+rescue Exception => bang
+	cgi.out do
+		cgi.html do
+			"An Major Error Occurred: " +	bang.to_s +
+			"<p> <strong>Backtrace:</strong>" +
+			"<ul> " +
+			"<li>" +
+			bang.backtrace.join("</li><li>") +
+			"</li>"+
+			"</ul>"
+		end
+	end
 end
