@@ -75,6 +75,9 @@ end
 
 
 begin
+	##
+	# In a catch block - if errors accor rase an RuntimeError with the message to be displayed to the user.
+	
 	#verfiy that the mapserv path is set..
 	if conf['mapserv']
 	  mapserv=conf['mapserv']
