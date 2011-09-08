@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby
+#!/usr/bin/env ruby
 =begin
 
 A MapServer CGI wrapper that simplifies the URLs to your WMS services.
@@ -62,12 +62,16 @@ magic = ENV['REQUEST_URI'].split('?')[0].split('/') if ENV['REQUEST_URI']
 empty = magic[0]
 fun = magic[1]
 map = magic[2]
+
+map = fun if (!map || map == "")
+
 #First look in "configs", and see if the url has a direct mapping..
 conf_item = find_item(conf["configs"], fun) if (conf["configs"] && conf["configs"].keys.length > 0)
 
 if (conf_item)
 	#for each item we need a "mapserv" and a "envsh" - if these don't exist, copy them from the default set.
 	["mapserv", "envsh"].each { |conf_key_set| conf_item[conf_key_set]=conf["defaults"][conf_key_set] if (!conf_item[conf_key_set]) }
+	conf = conf_item
 else
 	#no direct url mapping, use defaults.
 	conf = conf["defaults"]
@@ -99,7 +103,12 @@ begin
 	      "<tt>MAP_PREFIX=#{conf["prefix"]}</tt> but got <tt>#{fun}</tt> instead." )
 	end
 	
-	srs = cgi['srs'] || cgi['SRS'] || cgi['crs'] || cgi['CRS']
+	# A little more verbose than is require, but x||y||z logic does not appear to work..
+	srs = cgi['srs']
+	srs = cgi['SRS'] if (srs == nil || srs == "")
+	srs = cgi['crs'] if (srs == nil || srs == "")
+	srs = cgi['CRS'] if (srs == nil || srs == "")
+	
 	srs = srs.join() if (srs.class == Array)
 	proj = nil
 	proj = srs.split(":").last.to_i if (srs)
@@ -110,13 +119,18 @@ begin
 	if map and conf['maps'][map]
 	  mapfile = conf['maps'][map]
 	  if mapfile.class == Hash
-	    if mapfile[srs]
-	      mapfile = mapfile[srs]
-	else
-	      mapfile = mapfile['default']
-	    end
+		if mapfile[proj]
+			mapfile = mapfile[proj]
+		else
+			mapfile = mapfile['default']
+		end
 	  end
 	end
+	
+	STDERR.puts("Mapwrap: srs is #{cgi['CRS']}")
+	STDERR.puts("Mapwrap: srs is #{srs}")
+	STDERR.puts("Mapwrap: proj is #{proj}")
+	STDERR.puts("Mapwrap: Using mapfile #{mapfile}")
 	
 	#Verify that the mapfile is valid..
 	if not mapfile
