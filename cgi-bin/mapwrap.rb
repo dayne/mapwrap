@@ -57,14 +57,26 @@ cgi = CGI.new("html4")
 conf = YAML.load_file(CONFIG_FILE)
 
 # figure out which mapfile to use by parsing the fun:
-magic = ENV['REQUEST_URI'].split('?')[0].split('/') if ENV['REQUEST_URI']
+base_url = ENV['REQUEST_URI'].split('?')[0].split('/') if ENV['REQUEST_URI']
+base_url.delete_at(0) #remove first item, should be blank..
 
-empty = magic[0]
-fun = magic[1]
-map = magic[2]
+fun,map,$test = case ( base_url.length ) 
+	when 0 then 
+		[nil,nil,false]
+	when 1 then
+		[base_url[0], base_url[0], false]
+	when 2 then
+		 [base_url[0], base_url[1], false]
+	when 3 then
+		if ( base_url[2] == "test")
+			[base_url[0], base_url[1], true]
+		else
+			[base_url[0], base_url[1], false]
+		end
+end
 
-map = fun if (!map || map == "")
-
+STDERR.puts("fun=#{fun} map=#{map} test=#{$test}")
+		
 #First look in "configs", and see if the url has a direct mapping..
 conf_item = find_item(conf["configs"], fun) if (conf["configs"] && conf["configs"].keys.length > 0)
 
@@ -89,18 +101,10 @@ begin
 	  mapserv='mapserv' # rely on environment path to provide mapserv
 	end
 	
-	case magic[3]
-	  when 'test' then 
-	    $test = true
-	  else
-	    # no special sauce asked for, none given
-	end
-	
-	
 	if fun != conf["prefix"]
 	  # TODO error out here as the script has been run badly
 	  raise RuntimeError.new( "<b>MapWrap Error:</b>  <br />" + 
-	      "<tt>MAP_PREFIX=#{conf["prefix"]}</tt> but got <tt>#{fun}</tt> instead." )
+	      "<tt>MAP_PREFIX=#{conf["prefix"]}</tt> but got \"<tt>#{fun}</tt>\" instead." )
 	end
 	
 	# A little more verbose than is require, but x||y||z logic does not appear to work..
@@ -115,16 +119,27 @@ begin
 	
 	
 	# if proj is in the maps thing use it or just use default
-	
-	if map and conf['maps'][map]
-	  mapfile = conf['maps'][map]
-	  if mapfile.class == Hash
-		if mapfile[proj]
-			mapfile = mapfile[proj]
-		else
-			mapfile = mapfile['default']
+	if (conf['maps'] )   #Using maps
+		if map and conf['maps'][map]
+	  		mapfile = conf['maps'][map]
+	  		if mapfile.class == Hash
+				if proj && mapfile[proj] 
+					mapfile = mapfile[proj]
+				else
+					mapfile = mapfile['default']
+				end
+	  		end
 		end
-	  end
+	else  #not using maps section..
+		if (conf["projections"].class != Hash)
+			raise RuntimeError.new( "<b>MapWrap Error:</b>  <br />" +
+              		"<tt>projections block is not quite correct for \"#{map}\".</tt>")
+		end
+		if (proj && conf["projections"][proj])
+               		mapfile = conf["projections"][proj]
+                else
+                	mapfile = conf["projections"]['default']
+                end
 	end
 	
 	STDERR.puts("Mapwrap: srs is #{cgi['CRS']}")

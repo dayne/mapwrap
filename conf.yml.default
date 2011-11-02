@@ -1,8 +1,33 @@
-mapserv: /opt/mapping_tools/bin/mapserv.svn
-envsh: /opt/mapping_tools/setup.sh
-maps:
-  bluemarble: /www/wms/apps/mapserver/maps/bluemarble.map
-  megab: /www/wms/apps/mapserver/maps/megab.map
-  ortho_rgb: 
-    default: /www/wms/apps/mapserver/maps/ortho_rgb.map
-    900913: /www/wms/apps/mapserver/maps/ortho_rgb_gm.map
+defaults:
+  prefix: map
+  mapserv: /opt/mapping_tools/bin/mapserv.svn
+  envsh: /opt/mapping_tools/setup.sh
+  maps:
+    bluemarble: /www/wms/apps/mapserver/maps/bluemarble.map
+    megab: /www/wms/apps/mapserver/maps/megab.map
+    ortho_rgb:
+      default: /www/wms/apps/mapserver/maps/ortho_rgb.map
+      900913: /www/wms/apps/mapserver/maps/ortho_rgb_gm.map
+configs:
+  bdl:
+    prefix: bdl
+    url: bdl
+    projections:
+      default: "/www/wms/apps/bdl/bdl_alaska.map"
+      102006: "/www/wms/apps/bdl/bdl_alaska.map"
+      4326: "/www/wms/apps/bdl/bdl_geographic.map"
+      3338: "/www/wms/apps/bdl/bdl_alaska.map"
+      26903: "/www/wms/apps/bdl/bdl_26903.map"
+      26904: "/www/wms/apps/bdl/bdl_26904.map"
+      26905: "/www/wms/apps/bdl/bdl_26905.map"
+      26906: "/www/wms/apps/bdl/bdl_26906.map"
+      26907: "/www/wms/apps/bdl/bdl_26907.map"
+      26908: "/www/wms/apps/bdl/bdl_26908.map"
+      900913: "/www/wms/apps/bdl/bdl_900913.map"
+      102634: "/www/wms/apps/bdl/bdl_102634.map"
+      32606: "/www/wms/apps/bdl/bdl_32606.map"
+  extras:
+    prefix: extras
+    url: extras
+    projections:
+      default: "/www/wms/apps/bdl/extras_3338.map"
