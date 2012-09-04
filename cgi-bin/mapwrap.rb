@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/local/bin/ruby
 =begin
 
 A MapServer CGI wrapper that simplifies the URLs to your WMS services.
