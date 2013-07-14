@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby
+#!/usr/bin/env ruby
 =begin
 
 A MapServer CGI wrapper that simplifies the URLs to your WMS services.
@@ -57,28 +57,10 @@ cgi = CGI.new("html4")
 conf = YAML.load_file(CONFIG_FILE)
 
 # figure out which mapfile to use by parsing the fun:
-base_url = ENV['REQUEST_URI'].split('?')[0].split('/') if ENV['REQUEST_URI']
-base_url.delete_at(0) #remove first item, should be blank..
+base_url = ENV['REQUEST_URI'].split('?')[0].chomp("/") if ENV['REQUEST_URI']
 
-fun,map,$test = case ( base_url.length ) 
-	when 0 then 
-		[nil,nil,false]
-	when 1 then
-		[base_url[0], base_url[0], false]
-	when 2 then
-		 [base_url[0], base_url[1], false]
-	when 3 then
-		if ( base_url[2] == "test")
-			[base_url[0], base_url[1], true]
-		else
-			[base_url[0], base_url[1], false]
-		end
-end
-
-STDERR.puts("fun=#{fun} map=#{map} test=#{$test}")
-		
 #First look in "configs", and see if the url has a direct mapping..
-conf_item = find_item(conf["configs"], fun) if (conf["configs"] && conf["configs"].keys.length > 0)
+conf_item = find_item(conf["configs"], base_url) if (conf["configs"] && conf["configs"].keys.length > 0)
 
 if (conf_item)
 	#for each item we need a "mapserv" and a "envsh" - if these don't exist, copy them from the default set.
@@ -88,6 +70,8 @@ else
 	#no direct url mapping, use defaults.
 	conf = conf["defaults"]
 end
+
+
 
 
 begin
@@ -100,11 +84,14 @@ begin
 	else
 	  mapserv='mapserv' # rely on environment path to provide mapserv
 	end
+
+	STDERR.puts(conf.to_yaml)
 	
-	if fun != conf["prefix"]
+	if base_url != conf["url"]
 	  # TODO error out here as the script has been run badly
 	  raise RuntimeError.new( "<b>MapWrap Error:</b>  <br />" + 
-	      "<tt>MAP_PREFIX=#{conf["prefix"]}</tt> but got \"<tt>#{fun}</tt>\" instead." )
+	      "<tt>MAP_PREFIX=#{conf["url"]}</tt> but got \"<tt>#{base_url}</tt>\" instead." +
+	      "<br><tt> #{conf.inspect} </tt>" )
 	end
 	
 	# A little more verbose than is require, but x||y||z logic does not appear to work..
