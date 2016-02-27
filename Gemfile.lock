@@ -1,0 +1,12 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    mixlib-shellout (2.2.6)
+    version (1.0.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  mixlib-shellout
+  version

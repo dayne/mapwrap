@@ -98,3 +98,15 @@ Credit where credit is due
 --------------------------
 
 * [spruceboy](http://github.com/spruceboy) is the man behind the curtain.
+
+Developing
+==========
+
+If you are doing a new release you need to tag the new release. To 
+see your options for that run `rake -T` to see the options.
+
+For example a minor bug fix within a version is done by:
+
+    rake version:bump:revision
+
+Happy Hacking
