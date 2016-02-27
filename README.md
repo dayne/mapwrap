@@ -1,3 +1,21 @@
+# map-wrap
+Map Wrap, a tool to handle the cgi-bin handoff for mapserver. 
+
+Some notes on the layout of the services:
+```
+data - 
+  /ogc/data/bdl (big data area)  or /gluster/ogc/bdl    
+configs - 
+  /ogc/maps/bdl/(mapserver configs)
+  /ogc/maps/bdl/map_wrap/conf.yml
+map_wrap -  
+  mapwrap.rb
+  conf.yml
+```
+
+The basic flow is an incoming request for /foo, gets mapped to /token/foo and looks up in /ogc/maps/token/map_wrap/conf.yml for foo, and loads the config for "foo". 
+So -> http://wms.alaskamapped.org/bdl -> /bdl/bdl , and looked up in /ogc/maps/bdl/map_wrap/conf.yml 
+
 Map Wrap - MapServer wrapper
 ============================
 
@@ -12,14 +30,13 @@ A MapServer CGI wrapper that simplifies the URLs to your WMS services and provid
 
 *Why is that useful?*
 
-I like simple URLs to remember and hiding my secrets.  Users do not need to know, and I should have to remember, the path to my mapfiles.  I hate having to specify `?SERVICE=WMS&REQUEST=GetCapabilities` when doing my sanity check with curl.
+Simpler URLs to remember and hiding of silly details.  Users do not need to know, and I should not have to remember, the path to mapfiles on the local system.  Avoid the extra work of having to specify `?SERVICE=WMS&REQUEST=GetCapabilities` when doing a sanity check with curl.
 
 
 INSTALL:
 --------
 
-To use this handy wrapper script you have to setup a few things.
-
+To use this wrapper script there is a bit of a setup:
 
 * create an user friendly alias (for your users, not you)
 
@@ -45,7 +62,7 @@ To use this handy wrapper script you have to setup a few things.
 Apache Configuration
 --------------------
 
-The following can be slide into appropriate Apache config section or `/etc/httpd/conf.d/mapwrap.conf` for a global configuration:
+The following can be slid into appropriate Apache config section or `/etc/httpd/conf.d/mapwrap.conf` for a global configuration:
 
     <Directory "/path/to/mapwrap/cgi-bin">
       AllowOverride None
