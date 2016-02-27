@@ -97,7 +97,9 @@ The maps section takes a name and a path to a mapfile.  If you want to have an o
 Credit where credit is due
 --------------------------
 
-* [spruceboy](http://github.com/spruceboy) is the man behind the curtain.
+* @dayne - original author (late night hotel room hacking)
+* @spruceboy - man behind the WMS curtain at @gina-alaska
+* @teknofire - the super coder cleaner
 
 Developing
 ==========
