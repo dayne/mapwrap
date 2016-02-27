@@ -180,6 +180,8 @@ begin
   end
 
   if (cgi.params['map'].size == 0) && (cgi.params['MAP'].size == 0)
+    mapfile = ::File.join(mapserver_config_path, mapfile)
+
     ENV['QUERY_STRING'] = "map=#{mapfile}&" + ENV['QUERY_STRING']
     envsh = (File.exist? conf['envsh']) ? "source #{conf['envsh']}" : ''
     command = Mixlib::ShellOut.new("#{envsh} ; #{mapserv}", live_stdout: STDOUT, live_stderr: STDERR, timeout: conf['timeout'])
