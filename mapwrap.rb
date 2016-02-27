@@ -51,7 +51,10 @@ begin
   # in an attempt to clean up any requests for junk/hacks
   conf_token.gsub!(/\W+/, '-')
   # config file is in /ogc/maps/{token}/map_wrap/conf.yml
-  conf_file = "/ogc/maps/#{conf_token}/map_wrap/conf.yml"
+
+  base_path = ::File.dirname(__FILE__)
+  mapserver_config_path = ::File.realpath(::File.join('..', 'maps', conf_token), base_path)
+  conf_file = ::File.join(mapserver_config_path, 'map_wrap/conf.yml')
 
   unless File.exist?(conf_file)
     raise "Cannot access mapwrap config file at #{conf_file}"
@@ -78,11 +81,8 @@ STDERR.puts("Mapwrap: url is #{url}")
 # First look in "configs", and see if the url has a direct mapping..
 conf_item = conf['configs'][url] if conf['configs'] && conf['configs'].keys.length > 0
 
-
-#default timeout of 60 seconds
-unless conf['defaults']['timeout']
-	conf['defaults']['timeout'] = 60*60
-end
+#default timeout of 900 seconds
+conf['defaults']['timeout'] ||= 900
 
 if conf_item
   # for each item we need a "mapserv" and a "envsh"
